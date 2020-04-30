@@ -1,6 +1,6 @@
 #include "stm32f446xx.h"
 #include "stdio.h"
-na int main(){
+ int main(){
 		
 		// activate GPIOA bus
 		RCC->AHB1ENR |= 0x1;// or with
