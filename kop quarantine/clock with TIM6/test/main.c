@@ -1,14 +1,62 @@
 #include "stm32f446xx.h"
 #include "stdio.h"
 
+
+void updateMin();
+void updateSec();
+void updateHour();
 int testLED=0;
+
+int hour = 2;
+int minute = 12;
+int sec = 10;
+
 uint32_t debugCount_TIM7_IRQHandler = 0;
+
+void updateHour()
+{
+	sec++;
+	if(sec == 60 )
+	{
+		sec = 0;
+		updateMin();
+	}
+	return ;
+}
+
+void updateMin()
+{
+	minute++;
+	if(minute == 60 )
+	{
+		minute = 0;
+		updateHour();
+	}
+	return ;
+}
+
+void updateSec()
+{
+	hour++;
+	if(hour == 24 )
+	{
+		hour = 0;
+		
+	}
+	return ;
+}
+
+
+
+
 void TIM7_IRQHandler(void){
 	
 	// if one pulse mood is used in main(), then timer stops at one count, no interrupt happens, LED does not on,
 	// but if used in here( handler ) then LED is set on ,no blinking 
 	// TIM7->CR1 |= 0x6; // one pulse mood, counter off after one count
 	debugCount_TIM7_IRQHandler++;
+	//if(debugCount_TIM7_IRQHandler == 60 )
+		//updateSec();
 	//GPIOA->ODR ^= 0x20;
 	if(!testLED)
 	{
@@ -77,7 +125,7 @@ void Config_BasicTimer6(){
 		
 		TIM7->PSC = 1600-1 ; // c  dec 1600,clkspeed/psc,clkspeed = 16MHz, so 16*10^6/1600 = 10^4;
 		int preScalar = TIM7->PSC;
-		TIM7->ARR = 10000-1 ; //c hex of 10,000,counts upto arr
+		TIM7->ARR = 5000-1 ; //c hex of 10,000,counts upto arr
 		int testTimer = 0,timerCounter=0;
 		
 	  TIM7->CNT = 0x0; //c set ount at 0 ( changed hex to dec zero
