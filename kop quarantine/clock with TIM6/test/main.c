@@ -1,19 +1,29 @@
 #include "stm32f446xx.h"
 #include "stdio.h"
 
-
+void updateMiliSec();
 void updateMin();
 void updateSec();
 void updateHour();
+
 int testLED=0;
 
 int hour = 2;
 int minute = 12;
 int sec = 10;
-
+int milsec = 0;
 uint32_t debugCount_TIM7_IRQHandler = 0;
-
-void updateHour()
+void updateMiliSec()
+{
+	milsec+=100;
+	if(milsec == 1000)
+	{
+		milsec = 0;
+		updateSec();
+	}
+	return ;
+}
+void updateSec()
 {
 	sec++;
 	if(sec == 60 )
@@ -35,7 +45,7 @@ void updateMin()
 	return ;
 }
 
-void updateSec()
+void updateHour()
 {
 	hour++;
 	if(hour == 24 )
@@ -56,7 +66,7 @@ void TIM7_IRQHandler(void){
 	// TIM7->CR1 |= 0x6; // one pulse mood, counter off after one count
 	debugCount_TIM7_IRQHandler++;
 	//if(debugCount_TIM7_IRQHandler == 60 )
-		//updateSec();
+		updateMiliSec();
 	//GPIOA->ODR ^= 0x20;
 	if(!testLED)
 	{
@@ -102,7 +112,10 @@ void Config_BasicTimer6(){
 	//Basic Timer 6 configuration
 	RCC->APB1ENR |= 0x10; //clock enable
 	TIM6->PSC = 1600 - 1; //slow down the clock >>>> when board is running in 16Mhz, Timer clock speed = 1 * BUS speed = 1*16Mhz = 16Mhz >>>> TIM6->PSC = 16000000/1600 = 10000 or 10khz 
-	TIM6->ARR = 10000 - 1; //timer will count upto the value of ARR and generate a update event, TIM_ARR value = Timer speed after prescaled / Desire Freq = 10000/ 20 = 500
+	TIM6->ARR = 1000 - 1; //timer will count upto the value of ARR and generate a update event, TIM_ARR value = Timer speed after prescaled / Desire Freq = 10000/ 20 = 500
+//	1 sec or 1000ms e count kore 10,000
+//	1 ms e count kore 10
+//	100 ms e count kore 1000
 	//TIM6->EGR |= 0x1; // UG bit, Re-initializes the timer counter and generates an update of the registers
 	TIM6->CNT = 0;
   TIM6->DIER |= 0x1; //update interrupt enable
@@ -125,8 +138,11 @@ void Config_BasicTimer6(){
 		
 		TIM7->PSC = 1600-1 ; // c  dec 1600,clkspeed/psc,clkspeed = 16MHz, so 16*10^6/1600 = 10^4;
 		int preScalar = TIM7->PSC;
-		TIM7->ARR = 5000-1 ; //c hex of 10,000,counts upto arr
-		int testTimer = 0,timerCounter=0;
+		TIM7->ARR = 1000-1 ; //c hex of 10,000,counts upto arr
+		//	1 sec or 1000ms e count kore 10,000
+//	1 ms e count kore 10
+//	100 ms e count kore 1000
+	 int testTimer = 0,timerCounter=0;
 		
 	  TIM7->CNT = 0x0; //c set ount at 0 ( changed hex to dec zero
 		//if(TIM7->SR &1==1) then light up led
